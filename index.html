@@ -341,10 +341,9 @@ function ask(text) {
   document.getElementById("question").focus();
 }
 
-function sendQuestion() {
+async function sendQuestion() {
 
   const question = document.getElementById("question").value.trim();
-
   const response = document.getElementById("response");
 
   if (!question) {
@@ -352,13 +351,35 @@ function sendQuestion() {
   }
 
   response.style.display = "block";
+  response.textContent = "🤖 AutoAI мисли...";
 
-  response.textContent =
-    "AutoAI получи въпроса ти.\n\n" +
-    "AI системата ще бъде свързана в следващата стъпка.";
+  try {
 
+    const result = await fetch("/api/ask", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        question: question
+      })
+    });
+
+    const data = await result.json();
+
+    if (data.answer) {
+      response.textContent = data.answer;
+    } else {
+      response.textContent = "❌ AutoAI не успя да получи отговор.";
+    }
+
+  } catch (error) {
+
+    response.textContent =
+      "❌ Възникна проблем при връзката с AutoAI.";
+
+  }
 }
-
 </script>
 
 </body>
