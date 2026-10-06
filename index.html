@@ -368,11 +368,14 @@ async function sendQuestion() {
     const data = await result.json();
 
     if (data.answer) {
-      response.textContent = data.answer;
-    } else {
-      response.textContent = "❌ AutoAI не успя да получи отговор.";
-    }
-
+  response.textContent = data.answer;
+} else {
+  response.textContent =
+    "❌ AutoAI не успя да получи отговор.\n\n" +
+    "Грешка: " + (data.error || "Неизвестна грешка") +
+    "\n" +
+    "Детайли: " + (data.details || "Няма допълнителни данни");
+}
   } catch (error) {
 
     response.textContent =
