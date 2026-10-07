@@ -375,8 +375,18 @@ async function sendQuestion() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        question: question
-      })
+  question: question,
+  car: {
+    brand: localStorage.getItem("carBrand") || "",
+    model: localStorage.getItem("carModel") || "",
+    year: localStorage.getItem("carYear") || "",
+    engine: localStorage.getItem("carEngine") || "",
+    power: localStorage.getItem("carPower") || "",
+    fuel: localStorage.getItem("carFuel") || "",
+    transmission: localStorage.getItem("carTransmission") || "",
+    km: localStorage.getItem("carKm") || ""
+  }
+})
     });
 
     const data = await result.json();
