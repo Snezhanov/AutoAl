@@ -7,7 +7,18 @@ export default {
       try {
         const data = await request.json();
         const question = data.question?.trim();
+const car = data.car || {};
 
+const carInfo = `
+Марка: ${car.brand || "не е въведена"}
+Модел: ${car.model || "не е въведен"}
+Година: ${car.year || "не е въведена"}
+Двигател: ${car.engine || "не е въведен"}
+Мощност: ${car.power || "не е въведена"} HP
+Гориво: ${car.fuel || "не е въведено"}
+Скоростна кутия: ${car.transmission || "не е въведена"}
+Километри: ${car.km || "не са въведени"}
+`;
         if (!question) {
           return Response.json(
             { error: "Липсва въпрос." },
