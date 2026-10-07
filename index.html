@@ -397,7 +397,34 @@ async function sendQuestion() {
 
   }
 }
-</script>
+function showCarForm() {
+  document.getElementById("carForm").style.display = "block";
+}
+
+function saveCar() {
+
+  const brand = document.getElementById("carBrand").value.trim();
+  const model = document.getElementById("carModel").value.trim();
+  const year = document.getElementById("carYear").value.trim();
+  const engine = document.getElementById("carEngine").value.trim();
+  const power = document.getElementById("carPower").value.trim();
+  const fuel = document.getElementById("carFuel").value.trim();
+  const transmission = document.getElementById("carTransmission").value.trim();
+  const km = document.getElementById("carKm").value.trim();
+
+  if (!brand || !model) {
+    alert("Моля, въведи поне марка и модел.");
+    return;
+  }
+
+  document.getElementById("carName").textContent =
+    brand + " " + model;
+
+  document.getElementById("carInfo").textContent =
+    engine + " • " + power + " HP • " + km + " km";
+
+  document.getElementById("carForm").style.display = "none";
+}</script>
 
 </body>
 </html>
