@@ -421,7 +421,14 @@ function saveCar() {
   const fuel = document.getElementById("carFuel").value.trim();
   const transmission = document.getElementById("carTransmission").value.trim();
   const km = document.getElementById("carKm").value.trim();
-
+localStorage.setItem("carBrand", brand);
+localStorage.setItem("carModel", model);
+localStorage.setItem("carYear", year);
+localStorage.setItem("carEngine", engine);
+localStorage.setItem("carPower", power);
+localStorage.setItem("carFuel", fuel);
+localStorage.setItem("carTransmission", transmission);
+localStorage.setItem("carKm", km);
   if (!brand || !model) {
     alert("Моля, въведи поне марка и модел.");
     return;
