@@ -220,11 +220,25 @@
     <p>Интелигентният асистент за твоя автомобил</p>
   </header>
 
-  <div class="car">
+ <div class="car">
     <div class="car-title">МОЯТ АВТОМОБИЛ</div>
-    <div class="car-name">VW Tiguan</div>
-    <div class="car-info">1.5 TSI • 150 HP • 105 000 km</div>
-  </div>
+    <div class="car-name" id="carName">Добави автомобил</div>
+    <div class="car-info" id="carInfo">Въведи данните за своя автомобил</div>
+    <button onclick="showCarForm()">🚗 Добави автомобил</button>
+</div>
+
+<div id="carForm" style="display:none;">
+    <input id="carBrand" placeholder="Марка">
+    <input id="carModel" placeholder="Модел">
+    <input id="carYear" placeholder="Година">
+    <input id="carEngine" placeholder="Двигател">
+    <input id="carPower" placeholder="Мощност (HP)">
+    <input id="carFuel" placeholder="Гориво">
+    <input id="carTransmission" placeholder="Скоростна кутия">
+    <input id="carKm" placeholder="Километри">
+
+    <button onclick="saveCar()">💾 Запази автомобила</button>
+</div>
 
   <div class="notice">
     💡 AutoAI помага с диагностика, поддръжка и въпроси за автомобила. При опасни симптоми винаги потърси професионален сервиз.
