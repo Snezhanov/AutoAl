@@ -483,6 +483,132 @@ function openDiagnostics() {
 
   app.insertBefore(screen, notice);
 }
+  function startDiagnosticAnalysis() {
+
+  const symptom = document.getElementById("diagnosticSymptom").value.trim();
+  const result = document.getElementById("diagnosticResult");
+
+  if (!symptom) {
+    alert("Моля, опиши какъв е проблемът с автомобила.");
+    return;
+  }
+
+  result.style.display = "block";
+
+  result.innerHTML = `
+    <div style="
+      padding:14px;
+      border-radius:12px;
+      background:#eef6ff;
+      color:#1e3a8a;
+      font-size:14px;
+      line-height:1.5;
+    ">
+      🔍 AutoAI започва диагностиката...
+      <br><br>
+      Анализирам симптомите и данните за автомобила.
+    </div>
+  `;
+
+  const car = {
+    brand: localStorage.getItem("carBrand") || "",
+    model: localStorage.getItem("carModel") || "",
+    year: localStorage.getItem("carYear") || "",
+    engine: localStorage.getItem("carEngine") || "",
+    power: localStorage.getItem("carPower") || "",
+    fuel: localStorage.getItem("carFuel") || "",
+    transmission: localStorage.getItem("carTransmission") || "",
+    km: localStorage.getItem("carKm") || ""
+  };
+
+  const diagnosticQuestion = `
+Ти си AI диагностичен асистент за автомобили.
+
+Това НЕ е окончателна диагноза. Анализирай симптомите и посочи вероятни причини, проверки и следваща стъпка.
+
+Данни за автомобила:
+Марка: ${car.brand}
+Модел: ${car.model}
+Година: ${car.year}
+Двигател: ${car.engine}
+Мощност: ${car.power} HP
+Гориво: ${car.fuel}
+Скоростна кутия: ${car.transmission}
+Километри: ${car.km}
+
+Симптом, описан от собственика:
+${symptom}
+
+Първо анализирай симптома и ако информацията не е достатъчна, задай уточняващи въпроси вместо да измисляш причина.
+`;
+
+  fetch("/api/ask", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      question: diagnosticQuestion,
+      car: car
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+
+    if (data.answer) {
+
+      result.innerHTML = `
+        <div style="
+          padding:16px;
+          border-radius:12px;
+          background:white;
+          border:1px solid #e5e7eb;
+          color:#374151;
+          font-size:14px;
+          line-height:1.6;
+          white-space:pre-wrap;
+        ">
+          🔍 <b>Анализ на AutoAI</b>
+
+          <div style="margin-top:10px;">
+            ${data.answer}
+          </div>
+        </div>
+      `;
+
+    } else {
+
+      result.innerHTML = `
+        <div style="
+          padding:14px;
+          border-radius:12px;
+          background:#fef2f2;
+          color:#991b1b;
+          font-size:14px;
+        ">
+          ❌ AutoAI не успя да извърши диагностиката.
+        </div>
+      `;
+
+    }
+
+  })
+  .catch(error => {
+
+    result.innerHTML = `
+      <div style="
+        padding:14px;
+        border-radius:12px;
+        background:#fef2f2;
+        color:#991b1b;
+        font-size:14px;
+      ">
+        ❌ Възникна проблем при връзката с AutoAI.
+      </div>
+    `;
+
+  });
+}
 async function sendQuestion() {
 
   const question = document.getElementById("question").value.trim();
