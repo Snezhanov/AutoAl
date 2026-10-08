@@ -375,7 +375,114 @@ function ask(text) {
 
   document.getElementById("question").focus();
 }
+function openDiagnostics() {
 
+  const existing = document.getElementById("diagnosticsScreen");
+
+  if (existing) {
+    existing.style.display = "block";
+    existing.scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
+  const screen = document.createElement("div");
+
+  screen.id = "diagnosticsScreen";
+
+  screen.style.cssText = `
+    margin:20px 18px;
+    padding:18px;
+    border-radius:18px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+  `;
+
+  screen.innerHTML = `
+    <div style="
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:8px;
+    ">
+      <div style="font-size:26px;">🔧</div>
+
+      <div>
+        <div style="
+          font-size:20px;
+          font-weight:700;
+          color:#111827;
+        ">
+          AI Диагностика
+        </div>
+
+        <div style="
+          font-size:13px;
+          color:#64748b;
+          margin-top:2px;
+        ">
+          Опиши проблема с автомобила
+        </div>
+      </div>
+    </div>
+
+    <div style="
+      margin-top:18px;
+      font-size:14px;
+      font-weight:600;
+      color:#111827;
+    ">
+      Какво се случва?
+    </div>
+
+    <textarea
+      id="diagnosticSymptom"
+      placeholder="Например: Колата губи мощност при ускорение и се чува свистене..."
+      style="
+        width:100%;
+        min-height:110px;
+        margin-top:8px;
+        padding:12px;
+        border:1px solid #d1d5db;
+        border-radius:12px;
+        resize:none;
+        font-family:inherit;
+        font-size:14px;
+        outline:none;
+      "
+    ></textarea>
+
+    <button
+      onclick="startDiagnosticAnalysis()"
+      style="
+        margin-top:12px;
+        width:100%;
+        padding:14px;
+        border:0;
+        border-radius:12px;
+        background:#2563eb;
+        color:white;
+        font-size:16px;
+        font-weight:600;
+        cursor:pointer;
+      "
+    >
+      🔍 Започни диагностика
+    </button>
+
+    <div
+      id="diagnosticResult"
+      style="
+        display:none;
+        margin-top:16px;
+      "
+    ></div>
+  `;
+
+  const app = document.querySelector(".app");
+  const notice = document.querySelector(".notice");
+
+  app.insertBefore(screen, notice);
+}
 async function sendQuestion() {
 
   const question = document.getElementById("question").value.trim();
