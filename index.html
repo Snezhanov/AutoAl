@@ -637,7 +637,6 @@ function calculateRealHealth() {
   totalScore += points[conditions.suspension] * weights.suspension / 100;
   totalScore += points[conditions.maintenance] * weights.maintenance / 100;
 
-  // Предупредителните лампи имат специална тежест.
   if (conditions.warnings === "bad") {
     totalScore -= 20;
   } else if (conditions.warnings === "medium") {
@@ -652,6 +651,211 @@ function calculateRealHealth() {
   if (totalScore < 75) status = "🟡 Средно";
   if (totalScore < 60) status = "🟠 Внимание";
   if (totalScore < 40) status = "🔴 Лошо";
+
+  const recommendations = [];
+
+  if (conditions.brakes === "bad") {
+    recommendations.push({
+      priority: 1,
+      icon: "🔴",
+      title: "Спирачки",
+      level: "Висок приоритет",
+      text: "Има отбелязан проблем със спирачната система. Организирай проверка и ремонт възможно най-скоро."
+    });
+  } else if (conditions.brakes === "medium") {
+    recommendations.push({
+      priority: 2,
+      icon: "🟡",
+      title: "Спирачки",
+      level: "Среден приоритет",
+      text: "Има несигурност относно състоянието на спирачната система. Добре е да бъде проверена."
+    });
+  }
+
+  if (conditions.tires === "bad") {
+    recommendations.push({
+      priority: 1,
+      icon: "🔴",
+      title: "Гуми",
+      level: "Висок приоритет",
+      text: "Гумите са отбелязани като много износени. Не отлагай проверката и прецени необходимостта от смяна."
+    });
+  } else if (conditions.tires === "medium") {
+    recommendations.push({
+      priority: 2,
+      icon: "🟡",
+      title: "Гуми",
+      level: "Среден приоритет",
+      text: "Гумите са отбелязани като износени. Провери грайфера, налягането и общото им състояние."
+    });
+  }
+
+  if (conditions.engine === "bad") {
+    recommendations.push({
+      priority: 1,
+      icon: "🔴",
+      title: "Двигател",
+      level: "Висок приоритет",
+      text: "Има отбелязан сериозен проблем с двигателя. Препоръчва се проверка възможно най-скоро."
+    });
+  } else if (conditions.engine === "medium") {
+    recommendations.push({
+      priority: 2,
+      icon: "🟡",
+      title: "Двигател",
+      level: "Среден приоритет",
+      text: "Има отбелязани малки проблеми с двигателя. Добре е причината да бъде установена."
+    });
+  }
+
+  if (conditions.suspension === "bad") {
+    recommendations.push({
+      priority: 1,
+      icon: "🔴",
+      title: "Окачване",
+      level: "Висок приоритет",
+      text: "Има отбелязан сериозен проблем с окачването. Препоръчва се проверка възможно най-скоро."
+    });
+  } else if (conditions.suspension === "medium") {
+    recommendations.push({
+      priority: 2,
+      icon: "🟡",
+      title: "Окачване",
+      level: "Среден приоритет",
+      text: "Отбелязани са шумове или тропане. Добре е окачването да бъде проверено."
+    });
+  }
+
+  if (conditions.battery === "bad") {
+    recommendations.push({
+      priority: 1,
+      icon: "🔴",
+      title: "Акумулатор",
+      level: "Висок приоритет",
+      text: "Има отбелязан проблем с акумулатора. Препоръчва се проверка на акумулатора и зарядната система."
+    });
+  } else if (conditions.battery === "medium") {
+    recommendations.push({
+      priority: 3,
+      icon: "🟡",
+      title: "Акумулатор",
+      level: "Среден приоритет",
+      text: "Не е сигурно в какво състояние е акумулаторът. Добре е да бъде проверен."
+    });
+  }
+
+  if (conditions.maintenance === "bad") {
+    recommendations.push({
+      priority: 1,
+      icon: "🔴",
+      title: "Поддръжка",
+      level: "Висок приоритет",
+      text: "Обслужването е просрочено. Организирай необходимото обслужване възможно най-скоро."
+    });
+  } else if (conditions.maintenance === "medium") {
+    recommendations.push({
+      priority: 3,
+      icon: "🟡",
+      title: "Поддръжка",
+      level: "Среден приоритет",
+      text: "Предстои обслужване. Добре е да бъде планирано навреме."
+    });
+  }
+
+  if (conditions.warnings === "bad") {
+    recommendations.push({
+      priority: 1,
+      icon: "🔴",
+      title: "Предупредителни лампи",
+      level: "Висок приоритет",
+      text: "Има активна сериозна предупредителна лампа. Препоръчва се проверка възможно най-скоро."
+    });
+  } else if (conditions.warnings === "medium") {
+    recommendations.push({
+      priority: 2,
+      icon: "🟡",
+      title: "Предупредителни лампи",
+      level: "Среден приоритет",
+      text: "Има предупредителна лампа с неизвестна причина. Добре е причината да бъде установена."
+    });
+  }
+
+  recommendations.sort((a, b) => a.priority - b.priority);
+
+  let actionSection = "";
+
+  if (recommendations.length === 0) {
+    actionSection = `
+      <div style="
+        margin-top:20px;
+        padding:16px;
+        border-radius:12px;
+        background:#f8fafc;
+      ">
+        <div style="font-size:16px;font-weight:700;margin-bottom:8px;">
+          🛠️ Какво да направя?
+        </div>
+
+        <div style="font-size:14px;color:#475569;">
+          ✅ Не са открити потенциални проблеми според въведената информация.
+        </div>
+      </div>
+    `;
+  } else {
+    const recommendationHTML = recommendations.map((item, index) => `
+      <div style="
+        margin-top:${index === 0 ? "0" : "12px"};
+        padding:14px;
+        border-radius:12px;
+        background:#f8fafc;
+      ">
+        <div style="font-size:15px;font-weight:700;">
+          ${item.icon} ${index + 1}. ${item.title} — ${item.level}
+        </div>
+
+        <div style="
+          margin-top:6px;
+          font-size:13px;
+          color:#475569;
+          line-height:1.5;
+        ">
+          ${item.text}
+        </div>
+      </div>
+    `).join("");
+
+    const firstRecommendation = recommendations[0];
+
+    actionSection = `
+      <div style="margin-top:20px;">
+        <div style="font-size:16px;font-weight:700;margin-bottom:12px;">
+          🛠️ Какво да направя?
+        </div>
+
+        ${recommendationHTML}
+
+        <div style="
+          margin-top:14px;
+          padding:14px;
+          border-radius:12px;
+          background:#f8fafc;
+        ">
+          <div style="font-size:14px;font-weight:700;">
+            📋 Следваща стъпка
+          </div>
+
+          <div style="
+            margin-top:6px;
+            font-size:13px;
+            color:#475569;
+            line-height:1.5;
+          ">
+            Първо обърни внимание на <b>${firstRecommendation.title}</b>. Това е най-високият приоритет според въведената информация.
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
   const health = document.getElementById("carHealth");
 
@@ -680,6 +884,8 @@ function calculateRealHealth() {
         <div>🛠️ Поддръжка <b>${getHealthLabel(conditions.maintenance)}</b></div>
 
       </div>
+
+      ${actionSection}
 
       <div style="
         margin-top:18px;
@@ -711,7 +917,6 @@ function calculateRealHealth() {
     </div>
   `;
 }
-
 function getHealthLabel(condition) {
 
   if (condition === "good") return "🟢 Добро";
