@@ -601,9 +601,125 @@ document.getElementById("healthCheckButton").style.display = "block";
 }
 
 function calculateRealHealth() {
-  alert("📊 Данните са получени. Следващата стъпка е AutoAI да изчисли реалната оценка.");
+
+  const conditions = {
+    engine: document.getElementById("engineCondition").value,
+    brakes: document.getElementById("brakeCondition").value,
+    tires: document.getElementById("tireCondition").value,
+    battery: document.getElementById("batteryCondition").value,
+    suspension: document.getElementById("suspensionCondition").value,
+    maintenance: document.getElementById("maintenanceCondition").value,
+    warnings: document.getElementById("warningCondition").value
+  };
+
+  const weights = {
+    engine: 25,
+    brakes: 20,
+    tires: 15,
+    battery: 10,
+    suspension: 15,
+    maintenance: 15
+  };
+
+  const points = {
+    good: 100,
+    medium: 60,
+    bad: 20,
+    "": 50
+  };
+
+  let totalScore = 0;
+
+  totalScore += points[conditions.engine] * weights.engine / 100;
+  totalScore += points[conditions.brakes] * weights.brakes / 100;
+  totalScore += points[conditions.tires] * weights.tires / 100;
+  totalScore += points[conditions.battery] * weights.battery / 100;
+  totalScore += points[conditions.suspension] * weights.suspension / 100;
+  totalScore += points[conditions.maintenance] * weights.maintenance / 100;
+
+  // Предупредителните лампи имат специална тежест.
+  if (conditions.warnings === "bad") {
+    totalScore -= 20;
+  } else if (conditions.warnings === "medium") {
+    totalScore -= 10;
+  }
+
+  totalScore = Math.round(Math.max(0, Math.min(100, totalScore)));
+
+  let status = "🟢 Отлично";
+
+  if (totalScore < 90) status = "🟢 Добро";
+  if (totalScore < 75) status = "🟡 Средно";
+  if (totalScore < 60) status = "🟠 Внимание";
+  if (totalScore < 40) status = "🔴 Лошо";
+
+  const health = document.getElementById("carHealth");
+
+  health.innerHTML = `
+    <div style="padding:18px;">
+
+      <div style="text-align:center;">
+        <div class="health-title">СЪСТОЯНИЕ НА АВТОМОБИЛА</div>
+
+        <div class="health-score" style="font-size:42px;font-weight:700;margin:8px 0;">
+          ${totalScore}<span style="font-size:18px;">/100</span>
+        </div>
+
+        <div class="health-status" style="font-size:16px;font-weight:600;">
+          ${status}
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+
+        <div>🔧 Двигател <b>${getHealthLabel(conditions.engine)}</b></div>
+        <div>🛑 Спирачки <b>${getHealthLabel(conditions.brakes)}</b></div>
+        <div>🛞 Гуми <b>${getHealthLabel(conditions.tires)}</b></div>
+        <div>🔋 Акумулатор <b>${getHealthLabel(conditions.battery)}</b></div>
+        <div>⚙️ Окачване <b>${getHealthLabel(conditions.suspension)}</b></div>
+        <div>🛠️ Поддръжка <b>${getHealthLabel(conditions.maintenance)}</b></div>
+
+      </div>
+
+      <div style="
+        margin-top:18px;
+        padding:14px;
+        border-radius:12px;
+        background:#f8fafc;
+        color:#475569;
+        font-size:13px;
+      ">
+        ℹ️ Оценката е базирана на информацията, въведена в проверката.
+        Тя не заменя професионална диагностика.
+      </div>
+
+      <button
+        onclick="startHealthCheck()"
+        style="
+          margin-top:16px;
+          width:100%;
+          padding:14px;
+          border:0;
+          border-radius:12px;
+          background:#2563eb;
+          color:white;
+          font-size:16px;
+          cursor:pointer;
+        ">
+        🔄 Направи нова проверка
+      </button>
+
+    </div>
+  `;
 }
 
+function getHealthLabel(condition) {
+
+  if (condition === "good") return "🟢 Добро";
+  if (condition === "medium") return "🟡 Проверка";
+  if (condition === "bad") return "🔴 Проблем";
+  return "⚪ Няма данни";
+}
 </script>
 
 </body>
