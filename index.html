@@ -514,7 +514,90 @@ document.getElementById("healthCheckButton").style.display = "block";
   calculateHealthScore();
 }
   function startHealthCheck() {
-  alert("🔍 Проверката на автомобила ще бъде добавена тук.");
+
+  const health = document.getElementById("carHealth");
+
+  health.innerHTML = `
+    <div style="padding:18px;">
+      <h2 style="margin-top:0;">🔍 Проверка на автомобила</h2>
+
+      <p style="color:#64748b;font-size:13px;">
+        Отговори на въпросите според реалното състояние на автомобила.
+      </p>
+
+      <h3>🔧 Двигател</h3>
+      <select id="engineCondition">
+        <option value="">Избери</option>
+        <option value="good">Няма проблеми</option>
+        <option value="medium">Има малки проблеми</option>
+        <option value="bad">Има сериозни проблеми</option>
+      </select>
+
+      <h3>🛑 Спирачки</h3>
+      <select id="brakeCondition">
+        <option value="">Избери</option>
+        <option value="good">Добро състояние</option>
+        <option value="medium">Не съм сигурен</option>
+        <option value="bad">Има проблем</option>
+      </select>
+
+      <h3>🛞 Гуми</h3>
+      <select id="tireCondition">
+        <option value="">Избери</option>
+        <option value="good">Добро състояние</option>
+        <option value="medium">Износени</option>
+        <option value="bad">Много износени</option>
+      </select>
+
+      <h3>🔋 Акумулатор</h3>
+      <select id="batteryCondition">
+        <option value="">Избери</option>
+        <option value="good">Няма проблеми</option>
+        <option value="medium">Не съм сигурен</option>
+        <option value="bad">Има проблеми</option>
+      </select>
+
+      <h3>⚙️ Окачване</h3>
+      <select id="suspensionCondition">
+        <option value="">Избери</option>
+        <option value="good">Няма проблеми</option>
+        <option value="medium">Има шумове/тропане</option>
+        <option value="bad">Има сериозен проблем</option>
+      </select>
+
+      <h3>🛠️ Поддръжка</h3>
+      <select id="maintenanceCondition">
+        <option value="">Избери</option>
+        <option value="good">Обслужването е актуално</option>
+        <option value="medium">Предстои обслужване</option>
+        <option value="bad">Просрочено обслужване</option>
+      </select>
+
+      <h3>🚨 Предупредителни лампи</h3>
+      <select id="warningCondition">
+        <option value="">Избери</option>
+        <option value="good">Няма предупредителни лампи</option>
+        <option value="medium">Има лампа, но не знам причината</option>
+        <option value="bad">Има активна сериозна лампа</option>
+      </select>
+
+      <button
+        onclick="calculateRealHealth()"
+        style="
+          margin-top:20px;
+          width:100%;
+          padding:14px;
+          border:0;
+          border-radius:12px;
+          background:#2563eb;
+          color:white;
+          font-size:16px;
+          cursor:pointer;
+        ">
+        📊 Изчисли състоянието
+      </button>
+    </div>
+  `;
 }
 </script>
 
