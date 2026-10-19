@@ -219,12 +219,14 @@ ${question}
         ];
 
         // Run AI model
-        const result = await env.AI.run(
-          "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-          {
-            messages
-          }
-        );
+        
+const result = await env.AI.run(
+  "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  {
+    messages,
+    max_tokens: 1200
+  }
+);
 
         const answer =
           typeof result?.response === "string"
