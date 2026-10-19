@@ -375,8 +375,10 @@ function ask(text) {
 
   document.getElementById("question").focus();
 }
-function openDiagnostics() {
 
+let diagnosticHistory = [];
+
+function openDiagnostics() {
   const existing = document.getElementById("diagnosticsScreen");
 
   if (existing) {
@@ -386,7 +388,6 @@ function openDiagnostics() {
   }
 
   const screen = document.createElement("div");
-
   screen.id = "diagnosticsScreen";
 
   screen.style.cssText = `
@@ -398,119 +399,70 @@ function openDiagnostics() {
   `;
 
   screen.innerHTML = `
-    <div style="
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom:8px;
-    ">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
       <div style="font-size:26px;">🔧</div>
-
       <div>
-        <div style="
-          font-size:20px;
-          font-weight:700;
-          color:#111827;
-        ">
-          AI Диагностика
+        <div style="font-size:20px;font-weight:700;color:#111827;">
+          AI Диагностика 2.2
         </div>
-
-        <div style="
-          font-size:13px;
-          color:#64748b;
-          margin-top:2px;
-        ">
-          Опиши проблема с автомобила
+        <div style="font-size:13px;color:#64748b;margin-top:2px;">
+          Разговор за откриване на вероятната причина
         </div>
       </div>
     </div>
 
-    <div style="
-      margin-top:18px;
-      font-size:14px;
-      font-weight:600;
-      color:#111827;
-    ">
-      Какво се случва?
-    </div>
+    <label for="diagnosticSymptom"
+      style="display:block;margin-top:18px;font-size:14px;font-weight:600;">
+      Какво се случва с автомобила?
+    </label>
 
-    <textarea
-      id="diagnosticSymptom"
-      placeholder="Например: Колата губи мощност при ускорение и се чува свистене..."
-      style="
-        width:100%;
-        min-height:110px;
-        margin-top:8px;
-        padding:12px;
-        border:1px solid #d1d5db;
-        border-radius:12px;
-        resize:none;
-        font-family:inherit;
-        font-size:14px;
-        outline:none;
-      "
-    ></textarea>
+    <textarea id="diagnosticSymptom"
+      placeholder="Например: При ускорение колата губи мощност и се чува свистене..."
+      style="width:100%;min-height:110px;margin-top:8px;padding:12px;border:1px solid #d1d5db;border-radius:12px;resize:vertical;font-family:inherit;font-size:14px;box-sizing:border-box;"></textarea>
 
-    <button
+    <button id="startDiagnosticButton"
       onclick="startDiagnosticAnalysis()"
-      style="
-        margin-top:12px;
-        width:100%;
-        padding:14px;
-        border:0;
-        border-radius:12px;
-        background:#2563eb;
-        color:white;
-        font-size:16px;
-        font-weight:600;
-        cursor:pointer;
-      "
-    >
+      style="margin-top:12px;width:100%;padding:14px;border:0;border-radius:12px;background:#2563eb;color:white;font-size:16px;font-weight:600;cursor:pointer;">
       🔍 Започни диагностика
     </button>
 
-    <div
-      id="diagnosticResult"
-      style="
-        display:none;
-        margin-top:16px;
-      "
-    ></div>
+    <div id="diagnosticResult"
+      aria-live="polite"
+      style="display:none;margin-top:16px;"></div>
+
+    <div id="diagnosticFollowup"
+      style="display:none;margin-top:16px;">
+
+      <label for="diagnosticReply"
+        style="display:block;font-size:14px;font-weight:600;color:#111827;">
+        Отговори на AutoAI
+      </label>
+
+      <textarea id="diagnosticReply"
+        placeholder="Напиши отговора си тук..."
+        style="width:100%;min-height:85px;margin-top:8px;padding:12px;border:1px solid #d1d5db;border-radius:12px;resize:vertical;font-family:inherit;font-size:14px;box-sizing:border-box;"></textarea>
+
+      <button id="continueDiagnosticButton"
+        onclick="continueDiagnostic()"
+        style="margin-top:10px;width:100%;padding:13px;border:0;border-radius:12px;background:#0f766e;color:white;font-size:15px;font-weight:600;cursor:pointer;">
+        Изпрати отговор
+      </button>
+    </div>
   `;
 
   const app = document.querySelector(".app");
   const notice = document.querySelector(".notice");
 
-  app.insertBefore(screen, notice);
-}
-  function startDiagnosticAnalysis() {
-
-  const symptom = document.getElementById("diagnosticSymptom").value.trim();
-  const result = document.getElementById("diagnosticResult");
-
-  if (!symptom) {
-    alert("Моля, опиши какъв е проблемът с автомобила.");
+  if (!app) {
+    alert("Не е намерен основният контейнер на AutoAI.");
     return;
   }
 
-  result.style.display = "block";
+  app.insertBefore(screen, notice || null);
+}
 
-  result.innerHTML = `
-    <div style="
-      padding:14px;
-      border-radius:12px;
-      background:#eef6ff;
-      color:#1e3a8a;
-      font-size:14px;
-      line-height:1.5;
-    ">
-      🔍 AutoAI започва диагностиката...
-      <br><br>
-      Анализирам симптомите и данните за автомобила.
-    </div>
-  `;
-
-  const car = {
+function getDiagnosticCar() {
+  return {
     brand: localStorage.getItem("carBrand") || "",
     model: localStorage.getItem("carModel") || "",
     year: localStorage.getItem("carYear") || "",
@@ -520,94 +472,122 @@ function openDiagnostics() {
     transmission: localStorage.getItem("carTransmission") || "",
     km: localStorage.getItem("carKm") || ""
   };
+}
 
-  const diagnosticQuestion = `
-Ти си AI диагностичен асистент за автомобили.
+function renderDiagnosticHistory() {
+  const result = document.getElementById("diagnosticResult");
+  if (!result) return;
 
-Това НЕ е окончателна диагноза. Анализирай симптомите и посочи вероятни причини, проверки и следваща стъпка.
+  result.replaceChildren();
 
-Данни за автомобила:
-Марка: ${car.brand}
-Модел: ${car.model}
-Година: ${car.year}
-Двигател: ${car.engine}
-Мощност: ${car.power} HP
-Гориво: ${car.fuel}
-Скоростна кутия: ${car.transmission}
-Километри: ${car.km}
+  diagnosticHistory.forEach(message => {
+    const card = document.createElement("div");
 
-Симптом, описан от собственика:
-${symptom}
-
-Първо анализирай симптома и ако информацията не е достатъчна, задай уточняващи въпроси вместо да измисляш причина.
-`;
-
-  fetch("/api/ask", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      question: diagnosticQuestion,
-      car: car
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-
-    if (data.answer) {
-
-      result.innerHTML = `
-        <div style="
-          padding:16px;
-          border-radius:12px;
-          background:white;
-          border:1px solid #e5e7eb;
-          color:#374151;
-          font-size:14px;
-          line-height:1.6;
-          white-space:pre-wrap;
-        ">
-          🔍 <b>Анализ на AutoAI</b>
-
-          <div style="margin-top:10px;">
-            ${data.answer}
-          </div>
-        </div>
-      `;
-
-    } else {
-
-      result.innerHTML = `
-        <div style="
-          padding:14px;
-          border-radius:12px;
-          background:#fef2f2;
-          color:#991b1b;
-          font-size:14px;
-        ">
-          ❌ AutoAI не успя да извърши диагностиката.
-        </div>
-      `;
-
-    }
-
-  })
-  .catch(error => {
-
-    result.innerHTML = `
-      <div style="
-        padding:14px;
-        border-radius:12px;
-        background:#fef2f2;
-        color:#991b1b;
-        font-size:14px;
-      ">
-        ❌ Възникна проблем при връзката с AutoAI.
-      </div>
+    card.style.cssText = `
+      padding:14px;
+      margin-bottom:10px;
+      border-radius:12px;
+      background:${message.role === "assistant" ? "white" : "#eef6ff"};
+      border:1px solid #e5e7eb;
+      color:#374151;
+      font-size:14px;
+      line-height:1.6;
+      white-space:pre-wrap;
+      overflow-wrap:anywhere;
     `;
 
+    const title = document.createElement("b");
+    title.textContent =
+      message.role === "user" ? "Твоят отговор" : "🔍 AutoAI";
+
+    const body = document.createElement("div");
+    body.style.marginTop = "8px";
+    body.textContent = message.content;
+
+    card.append(title, body);
+    result.appendChild(card);
   });
+}
+
+async function startDiagnosticAnalysis() {
+  const symptom = document.getElementById("diagnosticSymptom")?.value.trim();
+
+  if (!symptom) {
+    alert("Моля, опиши какъв е проблемът с автомобила.");
+    return;
+  }
+
+  diagnosticHistory = [];
+
+  const followup = document.getElementById("diagnosticFollowup");
+  if (followup) followup.style.display = "block";
+
+  await runDiagnosticTurn(symptom);
+}
+
+async function continueDiagnostic() {
+  const input = document.getElementById("diagnosticReply");
+  const reply = input?.value.trim();
+
+  if (!reply) {
+    alert("Моля, въведи отговор.");
+    return;
+  }
+
+  await runDiagnosticTurn(reply);
+
+  if (input) input.value = "";
+}
+
+async function runDiagnosticTurn(question) {
+  const result = document.getElementById("diagnosticResult");
+  const startButton = document.getElementById("startDiagnosticButton");
+  const continueButton = document.getElementById("continueDiagnosticButton");
+
+  if (startButton) startButton.disabled = true;
+  if (continueButton) continueButton.disabled = true;
+
+  if (result) {
+    result.style.display = "block";
+    result.textContent = "🔍 AutoAI анализира информацията...";
+  }
+
+  try {
+    const response = await fetch("/api/ask", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        question: question,
+        car: getDiagnosticCar(),
+        history: diagnosticHistory.slice(-8)
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.answer) {
+      throw new Error(data.error || "Неуспешен диагностичен анализ.");
+    }
+
+    diagnosticHistory.push(
+      { role: "user", content: question },
+      { role: "assistant", content: data.answer }
+    );
+
+    renderDiagnosticHistory();
+
+  } catch (error) {
+    if (result) {
+      result.style.display = "block";
+      result.textContent =
+        "❌ " + (error.message || "Проблем при връзката с AutoAI.");
+    }
+  } finally {
+    if (startButton) startButton.disabled = false;
+    if (continueButton) continueButton.disabled = false;
+  }
 }
 async function sendQuestion() {
 
